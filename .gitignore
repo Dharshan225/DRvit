@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual environment
+venv/
+.venv/
+
+# User uploads
+uploads/
+
+# Local database
+database
+*.db
+*.sqlite
+*.sqlite3
+
+# Large model files
+*.pth
+*.pt
+*.onnx.data
+
+# VS Code
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db   
