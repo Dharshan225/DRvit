@@ -1,0 +1,1348 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+```
+<meta charset="UTF-8">
+
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0">
+
+<title>Patient Dashboard | AI Diabetic Retinopathy</title>
+
+
+<!-- Bootstrap -->
+
+<link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+    rel="stylesheet">
+
+
+<!-- Font Awesome -->
+
+<link
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    rel="stylesheet">
+
+
+<style>
+
+    /* =====================================================
+       THEME
+    ===================================================== */
+
+    :root {
+
+        --background: #f4f7ff;
+
+        --card: #ffffff;
+
+        --text: #17213c;
+
+        --muted: #69758c;
+
+        --primary: #172b9e;
+
+        --primary-light: #5269e8;
+
+        --gold: #c8a63a;
+
+        --border: #e2e6f0;
+
+        --input: #ffffff;
+
+        --shadow:
+            0 20px 60px rgba(20, 40, 120, 0.15);
+    }
+
+
+    body.dark-mode {
+
+        --background: #070b17;
+
+        --card: #10172b;
+
+        --text: #f4f6ff;
+
+        --muted: #aeb7cb;
+
+        --primary: #6177ff;
+
+        --primary-light: #8293ff;
+
+        --gold: #e2c458;
+
+        --border: rgba(255,255,255,0.10);
+
+        --input: #121b31;
+
+        --shadow:
+            0 25px 70px rgba(0,0,0,0.55);
+    }
+
+
+    /* =====================================================
+       BODY
+    ===================================================== */
+
+    body {
+
+        margin: 0;
+
+        min-height: 100vh;
+
+        background: var(--background);
+
+        color: var(--text);
+
+        font-family:
+            "Segoe UI",
+            Arial,
+            sans-serif;
+
+        transition:
+            background 0.3s ease,
+            color 0.3s ease;
+    }
+
+
+    /* =====================================================
+       NAVBAR
+    ===================================================== */
+
+    .premium-navbar {
+
+        min-height: 75px;
+
+        background:
+            linear-gradient(
+                135deg,
+                #07103d,
+                #172b9e,
+                #344bd0
+            );
+
+        box-shadow:
+            0 8px 30px rgba(0,0,0,0.20);
+    }
+
+
+    .navbar-content {
+
+        display: flex;
+
+        align-items: center;
+
+        justify-content: space-between;
+
+        width: 100%;
+    }
+
+
+    .nav-title {
+
+        margin: 0;
+
+        color: white;
+
+        font-size: 1.2rem;
+
+        font-weight: 700;
+    }
+
+
+    .nav-title i {
+
+        color: #efd574;
+
+        margin-right: 9px;
+    }
+
+
+    /* =====================================================
+       THEME BUTTON
+    ===================================================== */
+
+    .theme-control {
+
+        display: flex;
+
+        align-items: center;
+
+        gap: 8px;
+    }
+
+
+    .theme-text {
+
+        color: white;
+
+        font-size: 0.85rem;
+
+        font-weight: 600;
+    }
+
+
+    .theme-switch {
+
+        width: 70px;
+
+        height: 35px;
+
+        border-radius: 50px;
+
+        background:
+            rgba(255,255,255,0.16);
+
+        border:
+            1px solid rgba(255,255,255,0.30);
+
+        display: flex;
+
+        align-items: center;
+
+        justify-content: space-between;
+
+        padding: 0 8px;
+
+        position: relative;
+
+        cursor: pointer;
+    }
+
+
+    .theme-switch i {
+
+        z-index: 2;
+
+        font-size: 13px;
+    }
+
+
+    .sun-icon {
+
+        color: #ffd85c;
+    }
+
+
+    .moon-icon {
+
+        color: white;
+    }
+
+
+    .switch-circle {
+
+        position: absolute;
+
+        top: 3px;
+
+        left: 3px;
+
+        width: 29px;
+
+        height: 29px;
+
+        border-radius: 50%;
+
+        background: white;
+
+        transition:
+            transform 0.3s ease;
+    }
+
+
+    body.dark-mode .switch-circle {
+
+        transform:
+            translateX(35px);
+
+        background: #11182c;
+    }
+
+
+    /* =====================================================
+       MAIN
+    ===================================================== */
+
+    .dashboard-wrapper {
+
+        margin-top: 45px;
+
+        margin-bottom: 50px;
+    }
+
+
+    .dashboard-card {
+
+        background: var(--card);
+
+        border:
+            1px solid var(--border);
+
+        border-radius: 28px;
+
+        padding: 40px;
+
+        box-shadow: var(--shadow);
+
+        position: relative;
+    }
+
+
+    .dashboard-card::before {
+
+        content: "";
+
+        position: absolute;
+
+        top: 0;
+
+        left: 0;
+
+        width: 100%;
+
+        height: 4px;
+
+        border-radius:
+            28px 28px 0 0;
+
+        background:
+            linear-gradient(
+                90deg,
+                var(--primary),
+                var(--gold),
+                var(--primary-light)
+            );
+    }
+
+
+    /* =====================================================
+       HEADER
+    ===================================================== */
+
+    .dashboard-title {
+
+        color: var(--text);
+
+        font-size: 2rem;
+
+        font-weight: 800;
+
+        margin-bottom: 8px;
+    }
+
+
+    .dashboard-title i {
+
+        color: var(--gold);
+
+        margin-right: 8px;
+    }
+
+
+    .dashboard-subtitle {
+
+        color: var(--muted);
+
+        margin-bottom: 30px;
+    }
+
+
+    /* =====================================================
+       SEARCH
+    ===================================================== */
+
+    .search-box {
+
+        background:
+            rgba(82,105,232,0.06);
+
+        border:
+            1px solid var(--border);
+
+        border-radius: 18px;
+
+        padding: 22px;
+
+        margin-bottom: 30px;
+    }
+
+
+    .search-label {
+
+        color: var(--text);
+
+        font-weight: 700;
+
+        margin-bottom: 10px;
+    }
+
+
+    .form-control {
+
+        background: var(--input) !important;
+
+        color: var(--text) !important;
+
+        border:
+            1px solid var(--border);
+
+        border-radius: 12px;
+
+        padding: 13px 15px;
+    }
+
+
+    .form-control::placeholder {
+
+        color: var(--muted);
+
+    }
+
+
+    .form-control:focus {
+
+        border-color:
+            var(--primary-light);
+
+        box-shadow:
+            0 0 0 4px
+            rgba(82,105,232,0.12);
+    }
+
+
+    .search-btn {
+
+        border: none;
+
+        border-radius: 12px;
+
+        padding: 13px 28px;
+
+        color: white;
+
+        font-weight: 700;
+
+        background:
+            linear-gradient(
+                135deg,
+                #09165c,
+                #182b9e,
+                #5269e8
+            );
+    }
+
+
+    .search-btn i {
+
+        color: #efd574;
+
+        margin-right: 6px;
+    }
+
+
+    /* =====================================================
+       STATISTICS
+    ===================================================== */
+
+    .stat-card {
+
+        background: var(--card);
+
+        border:
+            1px solid var(--border);
+
+        border-radius: 18px;
+
+        padding: 22px;
+
+        height: 100%;
+
+        box-shadow:
+            0 8px 25px
+            rgba(20,40,120,0.07);
+    }
+
+
+    .stat-icon {
+
+        font-size: 1.7rem;
+
+        color: var(--gold);
+
+        margin-bottom: 10px;
+    }
+
+
+    .stat-number {
+
+        color: var(--text);
+
+        font-size: 1.7rem;
+
+        font-weight: 800;
+    }
+
+
+    .stat-label {
+
+        color: var(--muted);
+
+        font-size: 0.9rem;
+    }
+
+
+    /* =====================================================
+       TABLE
+    ===================================================== */
+
+    .section-heading {
+
+        color: var(--text);
+
+        font-weight: 800;
+
+        margin-top: 35px;
+
+        margin-bottom: 18px;
+    }
+
+
+    .section-heading i {
+
+        color: var(--gold);
+
+        margin-right: 8px;
+    }
+
+
+    .table-container {
+
+        border:
+            1px solid var(--border);
+
+        border-radius: 18px;
+
+        overflow: hidden;
+    }
+
+
+    table {
+
+        margin: 0 !important;
+
+        color: var(--text) !important;
+    }
+
+
+    thead {
+
+        background:
+            rgba(82,105,232,0.10);
+    }
+
+
+    th {
+
+        color: var(--text) !important;
+
+        font-size: 0.85rem;
+
+        text-transform: uppercase;
+
+        letter-spacing: 0.5px;
+
+        padding: 16px !important;
+
+        border-color: var(--border) !important;
+    }
+
+
+    td {
+
+        color: var(--text) !important;
+
+        padding: 16px !important;
+
+        border-color: var(--border) !important;
+
+        vertical-align: middle;
+    }
+
+
+    .patient-id {
+
+        color: var(--primary-light);
+
+        font-weight: 800;
+    }
+
+
+    .view-btn {
+
+        border:
+            1px solid var(--primary-light);
+
+        color: var(--primary-light);
+
+        background: transparent;
+
+        border-radius: 9px;
+
+        padding: 6px 12px;
+
+        font-size: 0.82rem;
+
+        font-weight: 700;
+    }
+
+
+    .view-btn:hover {
+
+        background:
+            var(--primary);
+
+        color: white;
+    }
+
+
+    /* =====================================================
+       EMPTY MESSAGE
+    ===================================================== */
+
+    .empty-message {
+
+        padding: 45px 20px;
+
+        text-align: center;
+
+        color: var(--muted);
+    }
+
+
+    .empty-message i {
+
+        font-size: 3rem;
+
+        color: var(--gold);
+
+        margin-bottom: 15px;
+    }
+
+
+    /* =====================================================
+       FOOTER
+    ===================================================== */
+
+    footer {
+
+        color: var(--muted);
+    }
+
+
+    footer hr {
+
+        border-color: var(--border);
+
+        opacity: 1;
+    }
+
+
+    footer h5 {
+
+        color: var(--text);
+
+        font-weight: 700;
+    }
+
+
+    footer span {
+
+        color: var(--gold);
+    }
+
+
+    /* =====================================================
+       MOBILE
+    ===================================================== */
+
+    @media (max-width: 768px) {
+
+        .dashboard-card {
+
+            padding: 25px;
+        }
+
+
+        .dashboard-title {
+
+            font-size: 1.5rem;
+        }
+
+
+        .theme-text {
+
+            display: none;
+        }
+
+
+        .table-container {
+
+            overflow-x: auto;
+        }
+
+    }
+
+</style>
+```
+
+</head>
+
+<body>
+
+<!-- =====================================================
+     NAVBAR
+===================================================== -->
+
+<nav class="navbar premium-navbar">
+
+```
+<div class="container">
+
+    <div class="navbar-content">
+
+
+        <h3 class="nav-title">
+
+            <i class="fa-solid fa-eye"></i>
+
+            AI Diabetic Retinopathy Detection
+
+        </h3>
+
+
+        <div class="theme-control">
+
+            <span
+                class="theme-text"
+                id="themeText">
+
+                Light
+
+            </span>
+
+
+            <div
+                class="theme-switch"
+                id="themeToggle">
+
+                <i class="fa-solid fa-sun sun-icon"></i>
+
+                <i class="fa-solid fa-moon moon-icon"></i>
+
+                <div class="switch-circle"></div>
+
+            </div>
+
+        </div>
+
+
+    </div>
+
+</div>
+```
+
+</nav>
+
+<!-- =====================================================
+     DASHBOARD
+===================================================== -->
+
+<div class="container dashboard-wrapper">
+
+```
+<div class="dashboard-card">
+
+
+    <!-- HEADER -->
+
+    <h1 class="dashboard-title">
+
+        <i class="fa-solid fa-chart-line"></i>
+
+        Patient Dashboard
+
+    </h1>
+
+
+    <p class="dashboard-subtitle">
+
+        Search and manage diabetic retinopathy
+        screening records.
+
+    </p>
+
+
+
+    <!-- =================================================
+         SEARCH
+    ================================================== -->
+
+    <div class="search-box">
+
+        <form
+            action="{{ url_for('dashboard') }}"
+            method="GET">
+
+            <label
+                class="search-label"
+                for="patient_id">
+
+                <i class="fa-solid fa-magnifying-glass"></i>
+
+                Search Patient
+
+            </label>
+
+
+            <div class="row g-2">
+
+                <div class="col-md-9">
+
+                    <input
+                        type="text"
+                        class="form-control"
+                        id="patient_id"
+                        name="patient_id"
+                        placeholder="Enter Patient ID, e.g. DR001"
+                        value="{{ search_id or '' }}">
+
+                </div>
+
+
+                <div class="col-md-3">
+
+                    <button
+                        type="submit"
+                        class="search-btn w-100">
+
+                        <i class="fa-solid fa-search"></i>
+
+                        Search
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        </form>
+
+    </div>
+
+
+
+    <!-- =================================================
+         STATISTICS
+    ================================================== -->
+
+    <div class="row g-3 mb-4">
+
+
+        <div class="col-md-4">
+
+            <div class="stat-card">
+
+                <div class="stat-icon">
+
+                    <i class="fa-solid fa-users"></i>
+
+                </div>
+
+                <div class="stat-number">
+
+                    {{ total_patients }}
+
+                </div>
+
+                <div class="stat-label">
+
+                    Total Patients
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="col-md-4">
+
+            <div class="stat-card">
+
+                <div class="stat-icon">
+
+                    <i class="fa-solid fa-file-medical"></i>
+
+                </div>
+
+                <div class="stat-number">
+
+                    {{ total_screenings }}
+
+                </div>
+
+                <div class="stat-label">
+
+                    Total Screenings
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="col-md-4">
+
+            <div class="stat-card">
+
+                <div class="stat-icon">
+
+                    <i class="fa-solid fa-calendar-check"></i>
+
+                </div>
+
+                <div class="stat-number">
+
+                    {{ today_screenings }}
+
+                </div>
+
+                <div class="stat-label">
+
+                    Today's Screenings
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =================================================
+         SEARCH RESULTS
+    ================================================== -->
+
+    {% if search_results %}
+
+
+    <h4 class="section-heading">
+
+        <i class="fa-solid fa-user-clock"></i>
+
+        Search Results
+
+    </h4>
+
+
+    <div class="table-container">
+
+        <table class="table table-hover">
+
+            <thead>
+
+                <tr>
+
+                    <th>Patient ID</th>
+
+                    <th>Name</th>
+
+                    <th>Age</th>
+
+                    <th>Gender</th>
+
+                    <th>Prediction</th>
+
+                    <th>Confidence</th>
+
+                    <th>Date</th>
+
+                    <th>Action</th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+                {% for patient in search_results %}
+
+                <tr>
+
+                    <td>
+
+                        <span class="patient-id">
+
+                            {{ patient[1] }}
+
+                        </span>
+
+                    </td>
+
+
+                    <td>
+
+                        {{ patient[2] }}
+
+                    </td>
+
+
+                    <td>
+
+                        {{ patient[3] }}
+
+                    </td>
+
+
+                    <td>
+
+                        {{ patient[4] }}
+
+                    </td>
+
+
+                    <td>
+
+                        {{ patient[7] }}
+
+                    </td>
+
+
+                    <td>
+
+                        {{ patient[8] }} %
+
+                    </td>
+
+
+                    <td>
+
+                        {{ patient[9] }}
+
+                    </td>
+
+
+                    <td>
+
+                        <a
+                            href="{{ url_for('patient_history', patient_id=patient[1]) }}"
+                            class="view-btn">
+
+                            <i class="fa-solid fa-eye"></i>
+
+                            View
+
+                        </a>
+
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+
+    {% elif search_id %}
+
+
+    <div class="empty-message">
+
+        <i class="fa-solid fa-user-slash"></i>
+
+        <h5>No Patient Found</h5>
+
+        <p>
+
+            No records were found for
+            <strong>{{ search_id }}</strong>.
+
+        </p>
+
+    </div>
+
+
+    {% endif %}
+
+
+
+    <!-- =================================================
+         RECENT PATIENTS
+    ================================================== -->
+
+    <h4 class="section-heading">
+
+        <i class="fa-solid fa-clock-rotate-left"></i>
+
+        Recent Screening Records
+
+    </h4>
+
+
+    {% if recent_patients %}
+
+
+    <div class="table-container">
+
+        <table class="table table-hover">
+
+            <thead>
+
+                <tr>
+
+                    <th>Patient ID</th>
+
+                    <th>Name</th>
+
+                    <th>Age</th>
+
+                    <th>Prediction</th>
+
+                    <th>Confidence</th>
+
+                    <th>Date</th>
+
+                    <th>Action</th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+                {% for patient in recent_patients %}
+
+                <tr>
+
+                    <td>
+
+                        <span class="patient-id">
+
+                            {{ patient[1] }}
+
+                        </span>
+
+                    </td>
+
+
+                    <td>
+
+                        {{ patient[2] }}
+
+                    </td>
+
+
+                    <td>
+
+                        {{ patient[3] }}
+
+                    </td>
+
+
+                    <td>
+
+                        {{ patient[7] }}
+
+                    </td>
+
+
+                    <td>
+
+                        {{ patient[8] }} %
+
+                    </td>
+
+
+                    <td>
+
+                        {{ patient[9] }}
+
+                    </td>
+
+
+                    <td>
+
+                        <a
+                            href="{{ url_for('patient_history', patient_id=patient[1]) }}"
+                            class="view-btn">
+
+                            <i class="fa-solid fa-eye"></i>
+
+                            View
+
+                        </a>
+
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+
+    {% else %}
+
+
+    <div class="empty-message">
+
+        <i class="fa-solid fa-folder-open"></i>
+
+        <h5>No Screening Records Yet</h5>
+
+        <p>
+
+            Patient screening records will appear here
+            after analysis.
+
+        </p>
+
+    </div>
+
+
+    {% endif %}
+
+
+</div>
+```
+
+</div>
+
+<!-- =====================================================
+     FOOTER
+===================================================== -->
+
+<footer>
+
+```
+<div class="container text-center">
+
+    <hr>
+
+    <h5>
+
+        Developed using
+
+        <span>Vision Transformer</span>
+        •
+        <span>PyTorch</span>
+        •
+        <span>Flask</span>
+        •
+        <span>SQLite</span>
+
+    </h5>
+
+
+    <p>
+
+        Biomedical Engineering Project
+
+    </p>
+
+</div>
+```
+
+</footer>
+
+<!-- =====================================================
+     JAVASCRIPT
+===================================================== -->
+
+<script>
+
+
+const themeToggle =
+    document.getElementById("themeToggle");
+
+const themeText =
+    document.getElementById("themeText");
+
+
+const savedTheme =
+    localStorage.getItem("dr-theme");
+
+
+if (savedTheme === "dark") {
+
+    document.body.classList.add("dark-mode");
+
+    themeText.textContent = "Dark";
+
+} else {
+
+    themeText.textContent = "Light";
+
+}
+
+
+themeToggle.addEventListener(
+    "click",
+    function () {
+
+        document.body.classList.toggle(
+            "dark-mode"
+        );
+
+
+        const dark =
+            document.body.classList.contains(
+                "dark-mode"
+            );
+
+
+        if (dark) {
+
+            localStorage.setItem(
+                "dr-theme",
+                "dark"
+            );
+
+            themeText.textContent = "Dark";
+
+        } else {
+
+            localStorage.setItem(
+                "dr-theme",
+                "light"
+            );
+
+            themeText.textContent = "Light";
+
+        }
+
+    }
+);
+
+</script>
+
+</body>
+
+</html>

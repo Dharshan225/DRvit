@@ -1,0 +1,1416 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+    <title>AI Diabetic Retinopathy Detection</title>
+
+
+    <!-- Bootstrap -->
+
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        rel="stylesheet">
+
+
+    <!-- Font Awesome -->
+
+    <link
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+        rel="stylesheet">
+
+
+    <!-- Your CSS -->
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='style.css') }}">
+
+
+    <style>
+
+        /* =====================================================
+           THEME VARIABLES
+        ===================================================== */
+
+        :root {
+
+            --background: #f4f7ff;
+
+            --card: #ffffff;
+
+            --text: #17213c;
+
+            --muted: #69758c;
+
+            --primary: #172b9e;
+
+            --primary-light: #5269e8;
+
+            --gold: #c8a63a;
+
+            --border: #e2e6f0;
+
+            --input: #ffffff;
+
+            --shadow:
+                0 20px 60px rgba(20, 40, 120, 0.15);
+        }
+
+
+        body.dark-mode {
+
+            --background: #070b17;
+
+            --card: #10172b;
+
+            --text: #f4f6ff;
+
+            --muted: #aeb7cb;
+
+            --primary: #6177ff;
+
+            --primary-light: #8293ff;
+
+            --gold: #e2c458;
+
+            --border: rgba(255,255,255,0.10);
+
+            --input: #121b31;
+
+            --shadow:
+                0 25px 70px rgba(0,0,0,0.55);
+        }
+
+
+        /* =====================================================
+           BODY
+        ===================================================== */
+
+        body {
+
+            margin: 0;
+
+            min-height: 100vh;
+
+            background: var(--background);
+
+            color: var(--text);
+
+            font-family:
+                "Segoe UI",
+                Arial,
+                sans-serif;
+
+            transition:
+                background 0.3s ease,
+                color 0.3s ease;
+        }
+
+
+        /* =====================================================
+           NAVBAR
+        ===================================================== */
+
+        .premium-navbar {
+
+            min-height: 75px;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #07103d,
+                    #172b9e,
+                    #344bd0
+                );
+
+            box-shadow:
+                0 8px 30px rgba(0,0,0,0.20);
+        }
+
+
+        .navbar-content {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 35px;
+
+            width: 100%;
+        }
+
+
+        .nav-title {
+
+            margin: 0;
+
+            color: #ffffff !important;
+
+            font-size: 1.25rem;
+
+            font-weight: 700;
+
+            white-space: nowrap;
+        }
+
+
+        .nav-title i {
+
+            color: #efd574;
+
+            margin-right: 9px;
+        }
+
+
+        /* =====================================================
+           THEME BUTTON
+        ===================================================== */
+
+        .theme-control {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 8px;
+        }
+
+
+        .theme-text {
+
+            color: white;
+
+            font-size: 0.85rem;
+
+            font-weight: 600;
+        }
+
+
+        .theme-switch {
+
+            width: 70px;
+
+            height: 35px;
+
+            border-radius: 50px;
+
+            background:
+                rgba(255,255,255,0.16);
+
+            border:
+                1px solid rgba(255,255,255,0.30);
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: space-between;
+
+            padding: 0 8px;
+
+            position: relative;
+
+            cursor: pointer;
+        }
+
+
+        .theme-switch i {
+
+            z-index: 2;
+
+            font-size: 13px;
+        }
+
+
+        .sun-icon {
+
+            color: #ffd85c;
+        }
+
+
+        .moon-icon {
+
+            color: #ffffff;
+        }
+
+
+        .switch-circle {
+
+            position: absolute;
+
+            top: 3px;
+
+            left: 3px;
+
+            width: 29px;
+
+            height: 29px;
+
+            border-radius: 50%;
+
+            background: white;
+
+            transition: transform 0.3s ease;
+        }
+
+
+        body.dark-mode .switch-circle {
+
+            transform:
+                translateX(35px);
+
+            background: #11182c;
+        }
+
+
+        /* =====================================================
+           MAIN
+        ===================================================== */
+
+        .main-wrapper {
+
+            margin-top: 45px;
+
+            margin-bottom: 50px;
+        }
+
+
+        .main-card {
+
+            background: var(--card);
+
+            border:
+                1px solid var(--border);
+
+            border-radius: 28px;
+
+            padding: 42px;
+
+            box-shadow: var(--shadow);
+
+            position: relative;
+        }
+
+
+        .main-card::before {
+
+            content: "";
+
+            position: absolute;
+
+            top: 0;
+
+            left: 0;
+
+            width: 100%;
+
+            height: 4px;
+
+            border-radius: 28px 28px 0 0;
+
+            background:
+                linear-gradient(
+                    90deg,
+                    var(--primary),
+                    var(--gold),
+                    var(--primary-light)
+                );
+        }
+
+
+        /* =====================================================
+           TITLE
+        ===================================================== */
+
+        .main-title {
+
+            color: var(--text) !important;
+
+            font-size: 2rem;
+
+            font-weight: 800;
+        }
+
+
+        .main-title i {
+
+            color: var(--gold);
+
+            margin-right: 8px;
+        }
+
+
+        .subtitle {
+
+            color: var(--muted) !important;
+
+            margin-bottom: 30px;
+        }
+
+
+        /* =====================================================
+           SECTION TITLE
+        ===================================================== */
+
+        .section-title {
+
+            color: var(--text);
+
+            font-size: 1.05rem;
+
+            font-weight: 800;
+
+            margin-bottom: 18px;
+        }
+
+
+        .section-title i {
+
+            color: var(--gold);
+
+            margin-right: 8px;
+        }
+
+
+        /* =====================================================
+           FORM
+        ===================================================== */
+
+        .form-label {
+
+            color: var(--text);
+
+            font-weight: 600;
+
+            font-size: 0.9rem;
+        }
+
+
+        .form-control,
+        .form-select {
+
+            background: var(--input) !important;
+
+            color: var(--text) !important;
+
+            border:
+                1px solid var(--border);
+
+            border-radius: 12px;
+
+            padding: 12px 14px;
+        }
+
+
+        .form-control::placeholder {
+
+            color: var(--muted);
+
+            opacity: 0.7;
+        }
+
+
+        .form-control:focus,
+        .form-select:focus {
+
+            background: var(--input) !important;
+
+            color: var(--text) !important;
+
+            border-color: var(--primary-light);
+
+            box-shadow:
+                0 0 0 4px
+                rgba(82,105,232,0.12);
+        }
+
+
+        .form-select option {
+
+            background: var(--card);
+
+            color: var(--text);
+        }
+
+
+        /* =====================================================
+           IMAGE PREVIEW
+        ===================================================== */
+
+        .preview-container {
+
+            max-width: 520px;
+
+            min-height: 250px;
+
+            margin:
+                10px auto 28px;
+
+            padding: 10px;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            border-radius: 22px;
+
+            border:
+                1px solid var(--border);
+
+            background:
+                rgba(82,105,232,0.05);
+        }
+
+
+        #preview {
+
+            width: 100%;
+
+            max-height: 320px;
+
+            object-fit: contain;
+
+            border-radius: 16px;
+        }
+
+
+        /* =====================================================
+           FILE INPUT
+        ===================================================== */
+
+        .form-control::file-selector-button {
+
+            background: var(--primary);
+
+            color: white;
+
+            border: none;
+
+            border-radius: 8px;
+
+            padding: 8px 14px;
+
+            margin-right: 10px;
+
+            font-weight: 600;
+        }
+
+
+        /* =====================================================
+           ANALYZE BUTTON
+        ===================================================== */
+
+        .analyze-btn {
+
+            border: none;
+
+            border-radius: 14px;
+
+            padding: 14px 42px;
+
+            color: white;
+
+            font-size: 1.05rem;
+
+            font-weight: 700;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #09165c,
+                    #182b9e,
+                    #5269e8
+                );
+
+            box-shadow:
+                0 12px 30px
+                rgba(20,40,160,0.30);
+
+            transition: 0.3s;
+        }
+
+
+        .analyze-btn:hover {
+
+            transform:
+                translateY(-3px);
+
+            box-shadow:
+                0 18px 40px
+                rgba(20,40,160,0.40);
+        }
+
+
+        .analyze-btn i {
+
+            color: #efd574;
+
+            margin-right: 8px;
+        }
+
+
+        /* =====================================================
+           RESULT CARD
+        ===================================================== */
+
+        .result-card {
+
+            margin-top: 30px;
+
+            padding: 28px;
+
+            border-radius: 22px;
+
+            background:
+                rgba(82,105,232,0.06);
+
+            border:
+                1px solid var(--border);
+        }
+
+
+        .result-card h3 {
+
+            color: var(--text) !important;
+
+            font-weight: 800;
+        }
+
+
+        .result-card h5 {
+
+            color: var(--muted) !important;
+
+            font-size: 0.85rem;
+
+            text-transform: uppercase;
+
+            letter-spacing: 1px;
+
+            font-weight: 700;
+        }
+
+
+        .patient-name {
+
+            color: var(--text);
+
+            font-weight: 700;
+        }
+
+
+        .patient-info {
+
+            color: var(--muted);
+        }
+
+
+        .prediction-text {
+
+            color: #d44949 !important;
+
+            font-weight: 800;
+        }
+
+
+        .confidence-text {
+
+            color: var(--primary-light) !important;
+
+            font-weight: 800;
+        }
+
+
+        /* =====================================================
+           PROGRESS
+        ===================================================== */
+
+        .progress {
+
+            height: 12px;
+
+            border-radius: 20px;
+
+            background:
+                rgba(120,130,150,0.15);
+        }
+
+
+        .progress-bar {
+
+            background:
+                linear-gradient(
+                    90deg,
+                    var(--primary),
+                    var(--primary-light),
+                    var(--gold)
+                );
+
+            border-radius: 20px;
+        }
+
+
+        /* =====================================================
+           UPLOADED IMAGE
+        ===================================================== */
+
+        .uploaded-image {
+
+            max-width: 100%;
+
+            max-height: 320px;
+
+            object-fit: contain;
+
+            border-radius: 18px;
+
+            border:
+                3px solid
+                rgba(200,166,58,0.45);
+
+            padding: 5px;
+
+            background: var(--card);
+
+            box-shadow:
+                0 15px 35px
+                rgba(0,0,0,0.18);
+        }
+
+
+        /* =====================================================
+           FOOTER
+        ===================================================== */
+
+        footer {
+
+            color: var(--muted);
+        }
+
+
+        footer hr {
+
+            border-color: var(--border);
+
+            opacity: 1;
+        }
+
+
+        footer h5 {
+
+            color: var(--text);
+
+            font-weight: 700;
+        }
+
+
+        footer span {
+
+            color: var(--gold);
+        }
+
+
+        /* =====================================================
+           MOBILE
+        ===================================================== */
+
+        @media (max-width: 768px) {
+
+            .navbar-content {
+
+                gap: 15px;
+            }
+
+
+            .nav-title {
+
+                font-size: 0.95rem;
+
+                white-space: normal;
+            }
+
+
+            .theme-text {
+
+                display: none;
+            }
+
+
+            .main-card {
+
+                padding: 25px;
+            }
+
+
+            .main-title {
+
+                font-size: 1.5rem;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<!-- =====================================================
+     NAVBAR
+===================================================== -->
+
+<nav class="navbar premium-navbar">
+
+    <div class="container">
+
+        <div class="navbar-content">
+
+
+            <h3 class="nav-title">
+
+                <i class="fa-solid fa-eye"></i>
+
+                AI Diabetic Retinopathy Detection
+
+            </h3>
+
+
+            <div class="theme-control">
+
+                <span
+                    class="theme-text"
+                    id="themeText">
+
+                    Light
+
+                </span>
+
+
+                <div
+                    class="theme-switch"
+                    id="themeToggle"
+                    title="Toggle Theme">
+
+                    <i class="fa-solid fa-sun sun-icon"></i>
+
+                    <i class="fa-solid fa-moon moon-icon"></i>
+
+                    <div class="switch-circle"></div>
+
+                </div>
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+</nav>
+
+
+
+<!-- =====================================================
+     MAIN CONTENT
+===================================================== -->
+
+<div class="container main-wrapper">
+
+    <div class="row justify-content-center">
+
+        <div class="col-lg-10">
+
+            <div class="main-card">
+
+
+                <h2 class="text-center main-title">
+
+                    <i class="fa-solid fa-microscope"></i>
+
+                    Vision Transformer Based Screening
+
+                </h2>
+
+
+                <p class="text-center subtitle">
+
+                    Upload a retinal fundus image for AI diagnosis
+
+                </p>
+
+
+
+                <!-- =================================================
+                     FORM
+                ================================================== -->
+
+                <form
+                    action="{{ url_for('predict') }}"
+                    method="POST"
+                    enctype="multipart/form-data">
+
+
+                    <!-- PATIENT DETAILS -->
+
+                    <div class="section-title">
+
+                        <i class="fa-solid fa-user"></i>
+
+                        Patient Details
+
+                    </div>
+
+
+                    <div class="row g-3 mb-4">
+
+
+                        <!-- Patient ID -->
+
+                        <div class="col-md-6">
+
+                            <label
+                                class="form-label"
+                                for="patient_id">
+
+                                Patient ID
+
+                            </label>
+
+
+                            <input
+                                type="text"
+                                class="form-control"
+                                id="patient_id"
+                                name="patient_id"
+                                placeholder="Enter Patient ID"
+                                value="{{ patient_id or '' }}"
+                                required>
+
+                        </div>
+
+
+                        <!-- Patient Name -->
+
+                        <div class="col-md-6">
+
+                            <label
+                                class="form-label"
+                                for="patient_name">
+
+                                Patient Name
+
+                            </label>
+
+
+                            <input
+                                type="text"
+                                class="form-control"
+                                id="patient_name"
+                                name="patient_name"
+                                placeholder="Enter Patient Name"
+                                value="{{ patient_name or '' }}"
+                                required>
+
+                        </div>
+
+
+                        <!-- Age -->
+
+                        <div class="col-md-4">
+
+                            <label
+                                class="form-label"
+                                for="age">
+
+                                Age
+
+                            </label>
+
+
+                            <input
+                                type="number"
+                                class="form-control"
+                                id="age"
+                                name="age"
+                                placeholder="Age"
+                                min="1"
+                                max="120"
+                                value="{{ age or '' }}"
+                                required>
+
+                        </div>
+
+
+                        <!-- Gender -->
+
+                        <div class="col-md-4">
+
+                            <label
+                                class="form-label"
+                                for="gender">
+
+                                Gender
+
+                            </label>
+
+
+                            <select
+                                class="form-select"
+                                id="gender"
+                                name="gender"
+                                required>
+
+                                <option value="">
+                                    Select Gender
+                                </option>
+
+                                <option
+                                    value="Male"
+                                    {% if gender == "Male" %}selected{% endif %}>
+
+                                    Male
+
+                                </option>
+
+                                <option
+                                    value="Female"
+                                    {% if gender == "Female" %}selected{% endif %}>
+
+                                    Female
+
+                                </option>
+
+                                <option
+                                    value="Other"
+                                    {% if gender == "Other" %}selected{% endif %}>
+
+                                    Other
+
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+                        <!-- Contact -->
+
+                        <div class="col-md-4">
+
+                            <label
+                                class="form-label"
+                                for="contact">
+
+                                Contact Number
+
+                            </label>
+
+
+                            <input
+                                type="tel"
+                                class="form-control"
+                                id="contact"
+                                name="contact"
+                                placeholder="Contact Number"
+                                value="{{ contact or '' }}">
+
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- RETINAL IMAGE -->
+
+                    <div class="section-title">
+
+                        <i class="fa-solid fa-image"></i>
+
+                        Retinal Fundus Image
+
+                    </div>
+
+
+                    <!-- IMAGE PREVIEW -->
+
+                    <div class="preview-container">
+
+                        <img
+                            id="preview"
+                            src="https://via.placeholder.com/500x320?text=Retina+Preview"
+                            alt="Retina Preview">
+
+                    </div>
+
+
+                    <!-- FILE UPLOAD -->
+
+                    <div class="mb-4">
+
+                        <input
+                            type="file"
+                            class="form-control"
+                            id="image"
+                            name="image"
+                            accept="image/png,image/jpeg,image/jpg"
+                            required
+                            onchange="previewImage(event)">
+
+                    </div>
+
+
+                    <!-- ANALYZE BUTTON -->
+
+                    <div class="text-center">
+
+                        <button
+                            class="analyze-btn"
+                            type="submit">
+
+                            <i class="fa-solid fa-brain"></i>
+
+                            Analyze Retina
+
+                        </button>
+
+                    </div>
+
+
+                </form>
+
+
+
+                <!-- =================================================
+                     RESULT
+                ================================================== -->
+
+                {% if prediction %}
+
+                <hr class="my-4">
+
+
+                <div class="result-card">
+
+
+                    <h3 class="text-center mb-4">
+
+                        <i
+                            class="fa-solid fa-circle-check"
+                            style="color: var(--gold);">
+                        </i>
+
+                        Prediction Result
+
+                    </h3>
+
+
+                    <div class="row">
+
+
+                        <!-- Patient -->
+
+                        <div class="col-md-6 mb-4">
+
+                            <h5>
+
+                                Patient
+
+                            </h5>
+
+
+                            <div class="patient-name">
+
+                                {{ patient_name }}
+
+                            </div>
+
+
+                            <div class="patient-info">
+
+                                Patient ID:
+                                {{ patient_id }}
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- Disease -->
+
+                        <div class="col-md-6 mb-4">
+
+                            <h5>
+
+                                Disease
+
+                            </h5>
+
+
+                            <h2 class="prediction-text">
+
+                                {{ prediction }}
+
+                            </h2>
+
+                        </div>
+
+
+                        <!-- Confidence -->
+
+                        <div class="col-md-6 mb-4">
+
+                            <h5>
+
+                                Confidence
+
+                            </h5>
+
+
+                            <h2 class="confidence-text">
+
+                                {{ confidence }} %
+
+                            </h2>
+
+
+                            <div class="progress">
+
+                                <div
+                                    class="progress-bar progress-bar-striped progress-bar-animated"
+                                    style="width: {{ confidence }}%;">
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- Patient Information -->
+
+                        <div class="col-md-6 mb-4">
+
+                            <h5>
+
+                                Patient Information
+
+                            </h5>
+
+
+                            <div
+                                style="color: var(--text);">
+
+                                Age:
+                                <strong>{{ age }}</strong>
+
+                                <br>
+
+                                Gender:
+                                <strong>{{ gender }}</strong>
+
+                                <br>
+
+                                Contact:
+                                <strong>{{ contact }}</strong>
+
+                            </div>
+
+                        </div>
+
+
+                    </div>
+
+
+
+                    <!-- =================================================
+                         UPLOADED IMAGE
+                    ================================================== -->
+
+                    {% if image %}
+
+                    <div class="text-center mt-3">
+
+                        <h5 class="mb-3">
+
+                            Uploaded Image
+
+                        </h5>
+
+
+                        <img
+                            src="{{ url_for('static', filename='uploads/' + image) }}"
+                            class="img-fluid uploaded-image"
+                            alt="Uploaded Retina Image">
+
+                    </div>
+
+                    {% endif %}
+
+
+                </div>
+
+                {% endif %}
+
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<!-- =====================================================
+     FOOTER
+===================================================== -->
+
+<footer class="mt-5">
+
+    <div class="container text-center">
+
+        <hr>
+
+
+        <h5>
+
+            Developed using
+
+            <span>Vision Transformer</span>
+            •
+            <span>PyTorch</span>
+            •
+            <span>Flask</span>
+            •
+            <span>CUDA</span>
+
+        </h5>
+
+
+        <p>
+
+            Biomedical Engineering Project
+
+        </p>
+
+    </div>
+
+</footer>
+
+
+
+<!-- =====================================================
+     JAVASCRIPT
+===================================================== -->
+
+<script>
+
+
+/* =====================================================
+   IMAGE PREVIEW
+===================================================== */
+
+function previewImage(event) {
+
+    const preview =
+        document.getElementById("preview");
+
+    const file =
+        event.target.files[0];
+
+
+    if (file) {
+
+        preview.src =
+            URL.createObjectURL(file);
+
+    }
+
+}
+
+
+
+/* =====================================================
+   DARK / LIGHT THEME
+===================================================== */
+
+const themeToggle =
+    document.getElementById("themeToggle");
+
+const themeText =
+    document.getElementById("themeText");
+
+
+const savedTheme =
+    localStorage.getItem("dr-theme");
+
+
+if (savedTheme === "dark") {
+
+    document.body.classList.add("dark-mode");
+
+    themeText.textContent = "Dark";
+
+} else {
+
+    themeText.textContent = "Light";
+
+}
+
+
+themeToggle.addEventListener(
+    "click",
+    function () {
+
+        document.body.classList.toggle(
+            "dark-mode"
+        );
+
+
+        const dark =
+            document.body.classList.contains(
+                "dark-mode"
+            );
+
+
+        if (dark) {
+
+            localStorage.setItem(
+                "dr-theme",
+                "dark"
+            );
+
+            themeText.textContent = "Dark";
+
+        } else {
+
+            localStorage.setItem(
+                "dr-theme",
+                "light"
+            );
+
+            themeText.textContent = "Light";
+
+        }
+
+    }
+);
+
+</script>
+
+
+</body>
+
+</html>
