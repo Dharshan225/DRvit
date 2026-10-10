@@ -12,17 +12,22 @@ from PIL import Image
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
+MODEL_DIR = os.path.join(BASE_DIR, "models")
+
 MODEL_PATH = os.path.join(
-    BASE_DIR,
+    MODEL_DIR,
     "DR_ViT_model.onnx"
+)
+
+MODEL_DATA_PATH = os.path.join(
+    MODEL_DIR,
+    "DR_ViT_model.onnx.data"
 )
 
 
 # =========================================================
 # CLASS NAMES
 # =========================================================
-
-# EXACT SAME ORDER AS ORIGINAL model.py
 
 CLASS_NAMES = [
     "Mild",
@@ -34,20 +39,36 @@ CLASS_NAMES = [
 
 
 # =========================================================
-# LOAD ONNX MODEL
+# VERIFY MODEL FILES
 # =========================================================
 
-if not os.path.exists(MODEL_PATH):
-
+if not os.path.isfile(MODEL_PATH):
     raise FileNotFoundError(
-        f"ONNX model not found at: {MODEL_PATH}"
+        f"ONNX model not found: {MODEL_PATH}\n"
+        "Run download_model.py to download the model."
+    )
+
+if not os.path.isfile(MODEL_DATA_PATH):
+    raise FileNotFoundError(
+        f"ONNX external weights not found: {MODEL_DATA_PATH}\n"
+        "Ensure both ONNX files are downloaded."
     )
 
 
-session = ort.InferenceSession(
-    MODEL_PATH,
-    providers=["CPUExecutionProvider"]
-)
+# =========================================================
+# LOAD ONNX MODEL
+# =========================================================
+
+try:
+    session = ort.InferenceSession(
+        MODEL_PATH,
+        providers=["CPUExecutionProvider"]
+    )
+
+except Exception as error:
+    raise RuntimeError(
+        f"Failed to load the ONNX model: {error}"
+    ) from error
 
 
 # =========================================================
@@ -58,15 +79,16 @@ INPUT_NAME = session.get_inputs()[0].name
 OUTPUT_NAME = session.get_outputs()[0].name
 
 
-print("========================================")
-print("ONNX MODEL LOADED SUCCESSFULLY")
-print("========================================")
-print("Model:", MODEL_PATH)
-print("Input name:", INPUT_NAME)
-print("Output name:", OUTPUT_NAME)
-print("Input shape:", session.get_inputs()[0].shape)
-print("Output shape:", session.get_outputs()[0].shape)
-print("========================================")
+print("=" * 50)
+print("DR ViT ONNX MODEL LOADED SUCCESSFULLY")
+print("=" * 50)
+print(f"Model path: {MODEL_PATH}")
+print(f"External weights: {MODEL_DATA_PATH}")
+print(f"Input name: {INPUT_NAME}")
+print(f"Output name: {OUTPUT_NAME}")
+print(f"Input shape: {session.get_inputs()[0].shape}")
+print(f"Output shape: {session.get_outputs()[0].shape}")
+print("=" * 50)
 
 
 # =========================================================
@@ -74,16 +96,14 @@ print("========================================")
 # =========================================================
 
 transform = transforms.Compose([
-
     transforms.Resize((224, 224)),
 
     transforms.ToTensor(),
 
     transforms.Normalize(
-        [0.485, 0.456, 0.406],
-        [0.229, 0.224, 0.225]
+        mean=[0.485, 0.456, 0.406],
+        std=[0.229, 0.224, 0.225]
     )
-
 ])
 
 
@@ -92,27 +112,43 @@ transform = transforms.Compose([
 # =========================================================
 
 def predict_image(image_path):
+    """
+    Predict the diabetic retinopathy class for an image.
+
+    Args:
+        image_path (str): Path to the retinal image.
+
+    Returns:
+        dict: Predicted class and confidence percentage.
+    """
 
     # -----------------------------------------------------
-    # Open image
+    # VERIFY IMAGE
     # -----------------------------------------------------
 
-    image = Image.open(image_path).convert("RGB")
-
+    if not os.path.isfile(image_path):
+        raise FileNotFoundError(
+            f"Image not found: {image_path}"
+        )
 
     # -----------------------------------------------------
-    # Preprocess
+    # OPEN IMAGE
+    # -----------------------------------------------------
+
+    with Image.open(image_path) as img:
+        image = img.convert("RGB")
+
+    # -----------------------------------------------------
+    # PREPROCESS IMAGE
     # -----------------------------------------------------
 
     image = transform(image)
 
-    # Add batch dimension
+    # Add batch dimension: [1, 3, 224, 224]
     image = image.unsqueeze(0)
-
 
     # Convert to NumPy float32
     image = image.numpy().astype(np.float32)
-
 
     # -----------------------------------------------------
     # ONNX INFERENCE
@@ -125,53 +161,38 @@ def predict_image(image_path):
         }
     )
 
-
-    # Get output for first image
-    outputs = outputs[0][0]
-
+    # Extract class scores for the first image
+    logits = outputs[0][0]
 
     # -----------------------------------------------------
     # SOFTMAX
     # -----------------------------------------------------
 
-    probabilities = np.exp(
-        outputs - np.max(outputs)
-    )
+    shifted_logits = logits - np.max(logits)
 
-    probabilities = probabilities / np.sum(
-        probabilities
-    )
+    probabilities = np.exp(shifted_logits)
 
+    probabilities = probabilities / np.sum(probabilities)
 
     # -----------------------------------------------------
-    # FIND PREDICTED CLASS
+    # PREDICTED CLASS
     # -----------------------------------------------------
 
-    predicted_index = int(
-        np.argmax(probabilities)
-    )
+    predicted_index = int(np.argmax(probabilities))
 
+    prediction = CLASS_NAMES[predicted_index]
 
     # -----------------------------------------------------
     # CONFIDENCE
     # -----------------------------------------------------
 
-    confidence = float(
-        probabilities[predicted_index]
-    )
-
+    confidence = float(probabilities[predicted_index]) * 100
 
     # -----------------------------------------------------
-    # RESULT
+    # RETURN RESULT
     # -----------------------------------------------------
 
     return {
-
-        "prediction": CLASS_NAMES[predicted_index],
-
-        "confidence": round(
-            confidence * 100,
-            2
-        )
-
+        "prediction": prediction,
+        "confidence": round(confidence, 2)
     }

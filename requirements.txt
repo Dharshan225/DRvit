@@ -1,7 +1,10 @@
 Flask==3.1.0
+Werkzeug>=3.1.0
+numpy
+Pillow
 torch
 torchvision
 timm
-numpy
-Pillow
+onnxruntime
+huggingface_hub
 opencv-python
